@@ -1,25 +1,38 @@
-import logo from "./logo.svg";
-import "./App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 // import { Component } from "react";
 import CardList from "./components/card-list/card-list.component";
 import SearchBox from "./components/search-box/search-box.component";
+import "./App.css";
+import { getData } from "./utils/data.utils";
+
+export type Monster = {
+  id: string;
+  name: string;
+  email: string;
+}
 
 // Functional Component
 const App = () => {
   const [searchField, setSearchField] = useState(""); // Array destructuring! useState return array of
   // two values. First is the value to be set, second is the method to set that value. Initial
   // value is passed to useState function.
-  const [monsters, setMonsters] = useState([]);
+  const [monsters, setMonsters] = useState<Monster[]>([]);
   const [ filteredMonsters, setFilteredMonsters ] = useState(monsters);
 
   // useEffect gets called the very first time this function runs. It gets called again every subsequent
   // time one or more of the values in the array (second argument) change.
   useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => response.json()) // Every .then() that returns a value is gonna return a
-      // promise that has been resolved.
-      .then((users) => setMonsters(users));
+    // fetch("https://jsonplaceholder.typicode.com/users")
+    //   .then((response) => response.json()) // Every .then() that returns a value is gonna return a
+    //   // promise that has been resolved.
+    //   .then((users) => setMonsters(users));
+
+    const fetchUsers = async () => {
+      const users = await getData<Array<Monster>>("https://jsonplaceholder.typicode.com/users");
+      setMonsters(users);
+    }
+
+    fetchUsers();
   }, []);
 
   useEffect(() => {
@@ -29,7 +42,7 @@ const App = () => {
     setFilteredMonsters(newFilteredMonsters);
   }, [ searchField, monsters ]);
 
-  const onSearchChange = (event) => {
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const searchFieldString = event.target.value.toLocaleLowerCase();
     setSearchField(searchFieldString);
   };
